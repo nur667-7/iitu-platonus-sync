@@ -34,6 +34,12 @@ class TaskPlanner {
     return { level: 'low', badge: '⚪', label: '> 7 дней', hoursLeft: Math.round(diffHours) };
   }
 
+  _toMinutes(timeStr) {
+    if (!timeStr) return 0;
+    const parts = timeStr.split(':').map(Number);
+    return (parts[0] || 0) * 60 + (parts[1] || 0);
+  }
+
   /**
    * Recommend what to do right now based on free time window and priority
    */
@@ -57,7 +63,24 @@ class TaskPlanner {
       contextNote = `Сейчас идёт пара: ${currentLesson.subject} (${currentLesson.startTime}–${currentLesson.endTime}).`;
     }
 
-    // 2. Score candidate tasks
+    // 2. Calculate next upcoming lesson & free window
+    const currentMins = this._toMinutes(currentHourMin);
+    const upcomingLessons = todayLessons
+      .filter(l => this._toMinutes(l.startTime) > currentMins)
+      .sort((a, b) => this._toMinutes(a.startTime) - this._toMinutes(b.startTime));
+
+    const nextLesson = upcomingLessons[0] || null;
+    let windowMinutes = null;
+    let windowNote = '';
+
+    if (nextLesson) {
+      windowMinutes = Math.max(0, this._toMinutes(nextLesson.startTime) - currentMins);
+      windowNote = `Свободное окно до следующей пары: ${windowMinutes} мин (до ${nextLesson.startTime} – ${nextLesson.subject})`;
+    } else if (todayLessons.length > 0) {
+      windowNote = `Все пары на сегодня завершены. Время для фокуса.`;
+    }
+
+    // 3. Score candidate tasks
     const scored = activeTasks.map(t => {
       let score = 0;
       const urgency = this.calculateUrgency(t.deadline, now);
@@ -72,6 +95,15 @@ class TaskPlanner {
       const todayStr = now.toISOString().split('T')[0];
       if (t.plannedDate && t.plannedDate.startsWith(todayStr)) score += 30;
 
+      // Window fit bonus
+      if (windowMinutes && t.estimate) {
+        if (t.estimate <= windowMinutes) {
+          score += 25; // task fits into available time window
+        } else if (t.estimate > windowMinutes * 1.5) {
+          score -= 15; // task significantly exceeds window
+        }
+      }
+
       return { task: t, score, urgency };
     });
 
@@ -84,12 +116,14 @@ class TaskPlanner {
       ? `Дедлайн через ${Math.max(1, top.urgency.hoursLeft)} ч.`
       : (top.task.priority === 'Критический' ? 'Критический приоритет.' : 'Запланировано на сегодня.');
 
+    const windowPart = windowNote ? `\n🕐 _${windowNote}_` : '';
+
     return {
       task: top.task,
       contextNote,
       message: `🎯 *Рекомендуемый фокус прямо сейчас:*\n` +
                `👉 *${subjectText}${top.task.title}*${estimateText}\n` +
-               `ℹ️ _Причина: ${reason}_`
+               `ℹ️ _Причина: ${reason}_${windowPart}`
     };
   }
 }
