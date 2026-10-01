@@ -1,0 +1,38 @@
+{
+  "name": "iitu-platonus-sync",
+  "version": "1.0.0",
+  "description": "Nurbek OS — Autonomous IITU Student Life Orchestrator: Platonus API, MS Teams, Notion Task Engine, 20% Retake Prevention & 24/7 Serverless Telegram Assistant",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nur667-7/iitu-platonus-sync.git"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js --mode=sync",
+    "morning": "node src/index.js --mode=morning",
+    "evening": "node src/index.js --mode=evening",
+    "teams": "node src/index.js --mode=teams",
+    "teams:test": "node src/index.js --mode=teams-test",
+    "teams:dry-run": "node src/index.js --mode=teams-dry-run",
+    "teams:reset": "node src/index.js --mode=teams-reset-state",
+    "bot": "node src/index.js --mode=telegram-bot",
+    "bot:poll": "node src/index.js --mode=telegram-process",
+    "focus": "node src/index.js --mode=focus",
+    "webhook:info": "node src/scripts/manageWebhook.js info",
+    "webhook:set": "node src/scripts/manageWebhook.js set",
+    "webhook:delete": "node src/scripts/manageWebhook.js delete",
+    "test": "node --test"
+  },
+  "keywords": [
+    "iitu",
+    "platonus",
+    "notion",
+    "calendar",
+    "automation"
+  ],
+  "author": "Nurbek Saiduali",
+  "license": "MIT",
+  "devDependencies": {
+    "vercel": "^62.1.0"
+  }
+}

@@ -1,0 +1,19 @@
+# Environment variables and secrets
+.env
+*.env
+platonus.env
+
+# Dependencies
+node_modules/
+
+# Logs and runtime artifacts
+state.json
+*.log
+.vercel/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Files
+.DS_Store
+Thumbs.db

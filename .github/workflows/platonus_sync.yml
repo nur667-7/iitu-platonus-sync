@@ -1,0 +1,55 @@
+name: Platonus IITU Sync & Reports
+
+on:
+  schedule:
+    # 08:30 Almaty (UTC+5) = 03:30 UTC
+    - cron: '30 3 * * *'
+    # 18:30 Almaty (UTC+5) = 13:30 UTC
+    - cron: '30 13 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Sync Mode (morning, evening, sync)'
+        required: true
+        default: 'sync'
+        type: choice
+        options:
+          - morning
+          - evening
+          - sync
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Determine Run Mode
+        id: run_mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT
+          else
+            HOUR=$(date -u +%H)
+            if [ "$HOUR" -lt 8 ]; then
+              echo "mode=morning" >> $GITHUB_OUTPUT
+            else
+              echo "mode=evening" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Execute Platonus Sync & Report
+        env:
+          PLATONUS_LOGIN: ${{ secrets.PLATONUS_LOGIN }}
+          PLATONUS_PASSWORD: ${{ secrets.PLATONUS_PASSWORD }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          node src/index.js --mode=${{ steps.run_mode.outputs.mode }} --source=primary
