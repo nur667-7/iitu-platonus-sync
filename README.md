@@ -18,6 +18,12 @@
 
 </div>
 
+<div align="center">
+
+📚 **Документация:** &nbsp; [Архитектура](docs/ARCHITECTURE.md) &nbsp;•&nbsp; [Telegram UX](docs/TELEGRAM.md) &nbsp;•&nbsp; [Развертывание](docs/DEPLOYMENT.md) &nbsp;•&nbsp; [Безопасность](docs/SECURITY.md)
+
+</div>
+
 ---
 
 ## 📑 Содержание
