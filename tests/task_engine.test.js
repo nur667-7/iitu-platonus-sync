@@ -113,4 +113,28 @@ test('TaskClassifier fast parser handles commands, queries and notes', () => {
   assert.strictEqual(s1.intent, 'CREATE_TASK');
   assert.strictEqual(s1.status, 'Когда-нибудь');
   assert.strictEqual(s1.priority, 'Низкий');
+
+  // Health command
+  const h1 = classifier.classifyFast('/health');
+  assert.strictEqual(h1.intent, 'HEALTH');
+});
+
+test('TaskResolver respects manualOverride and protects user edits', () => {
+  const resolver = new TaskResolver();
+  const userTask = {
+    id: 'task-user-custom',
+    title: 'Лабораторная работа 4 (Spring JPA)',
+    subject: 'Java Spring',
+    deadline: '2026-10-10', // User manually set a custom deadline
+    manualOverride: true
+  };
+
+  const incomingTeamsUpdate = {
+    title: 'Lab 4 deadline is 2026-10-05',
+    subject: 'Java Spring',
+    deadline: '2026-10-05'
+  };
+
+  const mergeResult = resolver.resolveMerge(userTask, incomingTeamsUpdate);
+  assert.strictEqual(mergeResult, null, 'Should not overwrite task when manualOverride is true');
 });

@@ -93,6 +93,12 @@ class TaskResolver {
   resolveMerge(existingTask, incomingEvent) {
     const updates = {};
 
+    // 0. Manual Override: if user manually set task properties, respect it
+    if (existingTask.manualOverride) {
+      console.log(`[TaskResolver] Skipping merge for "${existingTask.title}": protected by manualOverride`);
+      return null;
+    }
+
     // 1. Deadlines: Teacher/Platonus update takes precedence if new deadline is explicit
     if (incomingEvent.deadline && incomingEvent.deadline !== existingTask.deadline) {
       updates.deadline = incomingEvent.deadline;

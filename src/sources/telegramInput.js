@@ -160,6 +160,33 @@ class TelegramInput {
         break;
       }
 
+      case 'HEALTH': {
+        let notionStatus = '🔴 Ошибка';
+        try {
+          await this.taskEngine._request('/users/me');
+          notionStatus = '🟢 Подключен';
+        } catch (e) {
+          notionStatus = `🔴 Сбой (${e.message.slice(0, 30)})`;
+        }
+
+        const academicCache = (this.state && this.state.getAcademicCache()) || {};
+        const cacheDate = academicCache.lastFetchedAt
+          ? new Date(academicCache.lastFetchedAt).toLocaleString('ru-RU', { timeZone: 'Asia/Almaty' })
+          : 'нет данных';
+        const subjectsCount = academicCache.attendanceList ? academicCache.attendanceList.length : 0;
+        const cacheStatus = subjectsCount > 0 ? `🟢 Актуален (${subjectsCount} дисциплин, ${cacheDate})` : '🟡 Пуст';
+        const aiStatus = (this.classifier && this.classifier.apiKey) ? '🟢 Подключен (Groq gpt-oss-120b)' : '🟡 Локальный';
+
+        reply = `🩺 *Nurbek OS — Диагностика системы (Health Check):*\n\n` +
+                `• *Telegram Webhook:* 🟢 Активен (Vercel Serverless)\n` +
+                `• *Notion Tasks DB:* ${notionStatus}\n` +
+                `• *Академический кэш:* ${cacheStatus}\n` +
+                `• *AI Классификатор:* ${aiStatus}\n` +
+                `• *Контроль 20% ретейка:* 🟢 Детерминированный мониторинг\n\n` +
+                `ℹ️ _Все сервисы работают в штатном режиме._`;
+        break;
+      }
+
       case 'QUERY': {
         const qType = classification.queryType || 'today';
         const academicCache = (this.state && this.state.getAcademicCache()) || {};

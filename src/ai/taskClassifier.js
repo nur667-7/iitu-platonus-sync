@@ -30,6 +30,9 @@ class TaskClassifier {
     if (tLower === '/sync' || tLower === 'sync' || tLower === 'обнови' || tLower === 'синхронизируй' || tLower === 'проверь платонус') {
       return { intent: 'SYNC' };
     }
+    if (tLower === '/health' || tLower === 'health' || tLower === 'статус' || tLower === 'диагностика' || tLower === 'healthcheck' || tLower === 'проверка') {
+      return { intent: 'HEALTH' };
+    }
 
     // 1. Academic Queries (Deterministic fast response from local cache)
     if (tLower === '/attendance' || tLower === 'attendance' || tLower === '/retake' || tLower === 'retake' || /посещаемост|пропуск|ретейк|сколько нб|мои нб|\bнб\b/i.test(tLower)) {

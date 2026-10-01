@@ -54,6 +54,7 @@ class TaskEngine {
     const source = props['Источник']?.select?.name || 'Notion';
     const sourceUrl = props['URL источника']?.url || null;
     const estimate = props['Оценка времени']?.number || null;
+    const manualOverride = props['Ручная правка']?.checkbox || props['Manual Override']?.checkbox || false;
 
     return {
       id: page.id,
@@ -68,6 +69,7 @@ class TaskEngine {
       source,
       sourceUrl,
       estimate,
+      manualOverride,
       url: page.url,
       raw: page
     };

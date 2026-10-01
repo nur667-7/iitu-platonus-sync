@@ -18,6 +18,11 @@ on:
           - evening
           - sync
 
+# Prevent concurrent overlapping runs
+concurrency:
+  group: nurbek-os-sync
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -29,6 +34,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Restore persistent state
+        uses: actions/cache/restore@v4
+        with:
+          path: state.json
+          key: nurbek-os-state-${{ github.run_id }}
+          restore-keys: |
+            nurbek-os-state-
 
       - name: Determine Run Mode
         id: run_mode
@@ -49,7 +62,16 @@ jobs:
           PLATONUS_LOGIN: ${{ secrets.PLATONUS_LOGIN }}
           PLATONUS_PASSWORD: ${{ secrets.PLATONUS_PASSWORD }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_TASKS_DB_ID: ${{ secrets.NOTION_TASKS_DB_ID }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           node src/index.js --mode=${{ steps.run_mode.outputs.mode }} --source=primary
+
+      - name: Save persistent state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state.json
+          key: nurbek-os-state-${{ github.run_id }}
