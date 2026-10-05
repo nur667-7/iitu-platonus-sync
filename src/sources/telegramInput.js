@@ -149,8 +149,10 @@ class TelegramInput {
         if (this.onSyncRequest) {
           await this.sendReply(chatId, `🔄 *Запуск синхронизации с Platonus...*`);
           try {
-            await this.onSyncRequest();
-            reply = `✅ *Синхронизация завершена!* Кэш расписания, журнала и оценок обновлен.`;
+            const syncResult = await this.onSyncRequest();
+            reply = typeof syncResult === 'string'
+              ? syncResult
+              : `✅ *Синхронизация завершена!* Кэш расписания, журнала и оценок обновлен.`;
           } catch (err) {
             reply = `❌ Ошибка синхронизации: ${err.message}`;
           }

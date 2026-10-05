@@ -68,6 +68,20 @@ test('TelegramInput handles queries, completion, and notes without errors', asyn
   const rHelp = await telegramInput.handleIncomingMessage('/help', '123456789');
   assert.ok(rHelp.reply.includes('Nurbek OS — Команды & Быстрый доступ'));
 
+  const rWeek = await telegramInput.handleIncomingMessage('/week', '123456789');
+  assert.strictEqual(rWeek.classification.queryType, 'week');
+  assert.ok(rWeek.reply.includes('Расписание и задачи на неделю'));
+
+  const cloudSyncInput = new TelegramInput({
+    botToken: 'mock-bot-token',
+    chatId: '123456789',
+    taskEngine: mockTaskEngine,
+    onSyncRequest: async () => '☁️ Синхронизация выполняется по расписанию.'
+  });
+  cloudSyncInput.sendReply = async () => true;
+  const rCloudSync = await cloudSyncInput.handleIncomingMessage('/sync', '123456789');
+  assert.strictEqual(rCloudSync.reply, '☁️ Синхронизация выполняется по расписанию.');
+
   // 7. Academic Attendance & Grades from Cache
   const mockState = {
     data: { telegramLastUpdateId: 100 },

@@ -47,7 +47,7 @@ class TaskClassifier {
     }
 
     // 2. Schedule, Timeline & Task Queries
-    if (/что\s+(на|в)\s+(эту\s+)?недел|расписание\s+(на\s+)?недел|пары\s+(на\s+)?недел|на\s+эту\s+неделю|план\s+на\s+неделю|до\s+воскресен/i.test(tLower)) {
+    if (tLower === '/week' || tLower === 'week' || /что\s+(на|в)\s+(эту\s+)?недел|расписание\s+(на\s+)?недел|пары\s+(на\s+)?недел|на\s+эту\s+неделю|план\s+на\s+неделю|до\s+воскресен/i.test(tLower)) {
       return { intent: 'QUERY', queryType: 'week' };
     }
     if (/что\s+у\s+меня(\s+на\s+день)?|по\s+минутам|таймлайн|распиши\s+день|растав\b|хронологи/i.test(tLower)) {

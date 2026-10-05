@@ -79,8 +79,7 @@ module.exports = async function handler(req, res) {
       state,
       chatId: allowedChatId,
       onSyncRequest: async () => {
-        // Fast reply in serverless context without heavy blocking
-        return 'Облачная синхронизация Platonus запускается автоматически по расписанию GitHub Actions (08:30 и 18:30).';
+        return '☁️ *Облачная синхронизация работает по расписанию:* 08:30 и 18:30 по Алматы.\nДля немедленного обновления пока используется локальный запуск `npm start`.';
       }
     });
 

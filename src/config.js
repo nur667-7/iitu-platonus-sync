@@ -99,6 +99,6 @@ module.exports = {
     UNIVERSITY_PAGE_ID: process.env.NOTION_UNIVERSITY_PAGE_ID || '3ebd4221-a166-81ac-b96e-fba23c9b928c',
     TASKS_DB_ID: process.env.NOTION_TASKS_DB_ID || '3ebd4221-a166-813d-8c12-e4bed5dbda72',
     INBOX_DB_ID: process.env.NOTION_INBOX_DB_ID || '3ebd4221-a166-811f-bb50-d3d7110a377f',
-    KNOWLEDGE_DB_ID: process.env.NOTION_KNOWLEDGE_DB_ID || ''
+    KNOWLEDGE_DB_ID: process.env.NOTION_KNOWLEDGE_DB_ID || '3ebd4221-a166-81e0-97b3-f9a5c9e82a20'
   }
 };
