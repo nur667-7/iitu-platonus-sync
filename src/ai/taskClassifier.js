@@ -4,6 +4,7 @@
  */
 
 const config = require('../config');
+const { dateKeyInTimeZone } = require('../shared/clock');
 
 class TaskClassifier {
   constructor(options = {}) {
@@ -143,7 +144,7 @@ class TaskClassifier {
       };
     }
 
-    const todayStr = now.toISOString().split('T')[0];
+    const todayStr = dateKeyInTimeZone(now);
     const systemPrompt = `You are the Task Intelligence Engine for Nurbek OS (IITU University student).
 Today's Date: ${todayStr} (Asia/Almaty, UTC+5).
 

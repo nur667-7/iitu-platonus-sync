@@ -25,14 +25,18 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // 3. Security: Validate Telegram Secret Token header if configured
+  // 3. Security: production webhook configuration is mandatory and fail-closed.
   const configuredSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
-  if (configuredSecret) {
-    const incomingSecret = req.headers['x-telegram-bot-api-secret-token'];
-    if (incomingSecret !== configuredSecret) {
-      console.warn('[Webhook] Unauthorized: invalid or missing secret token');
-      return res.status(401).json({ error: 'Unauthorized: invalid secret token' });
-    }
+  const allowedChatId = String(process.env.TELEGRAM_CHAT_ID || '');
+  if (!configuredSecret || !allowedChatId) {
+    console.error('[Webhook] Required security configuration is missing');
+    return res.status(503).json({ error: 'Service unavailable' });
+  }
+
+  const incomingSecret = req.headers['x-telegram-bot-api-secret-token'];
+  if (incomingSecret !== configuredSecret) {
+    console.warn('[Webhook] Unauthorized request rejected');
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const update = req.body;
@@ -48,8 +52,13 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
+  if (String(chatId) !== allowedChatId) {
+    console.warn('[Webhook] Request from unauthorized chat rejected');
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   try {
-    console.log(`[Webhook] Update ${update.update_id} received from chat ID ${chatId}`);
+    console.log(`[Webhook] Update ${update.update_id} received`);
 
     // Stateless state manager: loads bundled or environment cache without requiring disk writes
     const state = new StateManager();
@@ -64,6 +73,7 @@ module.exports = async function handler(req, res) {
       classifier,
       planner,
       state,
+      chatId: allowedChatId,
       onSyncRequest: async () => {
         // Fast reply in serverless context without heavy blocking
         return 'Облачная синхронизация Platonus запускается автоматически по расписанию GitHub Actions (08:30 и 18:30).';
@@ -81,8 +91,10 @@ module.exports = async function handler(req, res) {
       intent: result?.classification?.intent || 'HANDLED'
     });
   } catch (err) {
-    console.error('[Webhook Error]', err.message);
-    // Always return HTTP 200 so Telegram does not aggressively retry failed user messages
-    return res.status(200).json({ ok: false, error: err.message });
+    const correlationId = `tg-${update.update_id || 'unknown'}-${Date.now()}`;
+    console.error(`[Webhook Error] ${correlationId}: processing failed`);
+    // A retryable status lets Telegram redeliver transient failures. Durable
+    // update_id idempotency is the next Inbox milestone.
+    return res.status(500).json({ ok: false, error: 'Processing failed', correlationId });
   }
 };

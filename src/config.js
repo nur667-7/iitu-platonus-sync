@@ -24,6 +24,10 @@ module.exports = {
     STATE_FILE: path.resolve(__dirname, '../state.json')
   },
 
+  LOGGING: {
+    SENSITIVE_DIAGNOSTICS: process.env.DEBUG_SENSITIVE_LOGS === 'true'
+  },
+
   // Microsoft Teams Integration
   TEAMS: {
     ENABLED: process.env.TEAMS_ENABLED === 'true',
@@ -94,6 +98,7 @@ module.exports = {
   NOTION: {
     UNIVERSITY_PAGE_ID: process.env.NOTION_UNIVERSITY_PAGE_ID || '3ebd4221-a166-81ac-b96e-fba23c9b928c',
     TASKS_DB_ID: process.env.NOTION_TASKS_DB_ID || '3ebd4221-a166-813d-8c12-e4bed5dbda72',
-    INBOX_DB_ID: process.env.NOTION_INBOX_DB_ID || '3ebd4221-a166-811f-bb50-d3d7110a377f'
+    INBOX_DB_ID: process.env.NOTION_INBOX_DB_ID || '3ebd4221-a166-811f-bb50-d3d7110a377f',
+    KNOWLEDGE_DB_ID: process.env.NOTION_KNOWLEDGE_DB_ID || ''
   }
 };

@@ -21,7 +21,8 @@
     "webhook:info": "node src/scripts/manageWebhook.js info",
     "webhook:set": "node src/scripts/manageWebhook.js set",
     "webhook:delete": "node src/scripts/manageWebhook.js delete",
-    "test": "node --test"
+    "test": "node --test",
+    "test:ci": "node --test --test-isolation=none"
   },
   "keywords": [
     "iitu",

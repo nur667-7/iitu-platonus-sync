@@ -61,11 +61,11 @@ class TelegramInput {
    */
   async handleIncomingMessage(text, chatId = this.allowedChatId, academicContext = {}) {
     if (this.allowedChatId && String(chatId) !== this.allowedChatId) {
-      console.warn(`[TelegramInput] Ignored message from unauthorized chat ID: ${chatId}`);
+      console.warn('[TelegramInput] Ignored message from unauthorized chat');
       return null;
     }
 
-    console.log(`[TelegramInput] Handling message: "${text}"`);
+    console.log('[TelegramInput] Handling authorized message');
     const classification = await this.classifier.classify(text);
     console.log(`[TelegramInput] Classified intent:`, classification.intent);
 
@@ -439,16 +439,19 @@ class TelegramInput {
 
       const results = [];
       for (const update of data.result) {
+        const msg = update.message;
+        if (msg && msg.text) {
+          const resObj = await this.handleIncomingMessage(msg.text, msg.chat.id, academicContext);
+          results.push(resObj);
+        }
+
+        // Telegram considers updates confirmed when a later offset is used.
+        // Advance the checkpoint only after this update has been handled.
         this.lastUpdateId = Math.max(this.lastUpdateId, update.update_id);
         if (this.state) {
           this.state.data.telegramLastUpdateId = this.lastUpdateId;
           this.state.saveLocal();
         }
-        const msg = update.message;
-        if (!msg || !msg.text) continue;
-
-        const resObj = await this.handleIncomingMessage(msg.text, msg.chat.id, academicContext);
-        results.push(resObj);
       }
 
       return results;

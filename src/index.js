@@ -222,7 +222,7 @@ async function syncPlatonus({ mode = 'sync', source = 'primary', state, notifier
   const client = new PlatonusClient(login, password);
   console.log('[Platonus Orchestrator] Authenticating with Platonus API...');
   await client.authenticate();
-  console.log(`[Platonus Orchestrator] Authenticated. PersonID: ${client.personId}`);
+  console.log('[Platonus Orchestrator] Authenticated successfully.');
 
   // Special mode: UMKD inspection (standalone on-demand)
   if (mode === 'umkd') {
@@ -286,12 +286,18 @@ async function syncPlatonus({ mode = 'sync', source = 'primary', state, notifier
     events.push({ type: 'NEW_ASSIGNMENT', details: 'Обнаружены новые задания в Platonus' });
   }
 
-  console.log('\n================ АКАДЕМИЧЕСКИЙ СТАТУС IITU ================');
-  for (const s of attendanceList) {
-    console.log(`${s.statusLabel} | ${s.subjectName}`);
-    console.log(`  Пропусков: ${s.missedSessions}/${s.heldSessions} (${s.currentAbsencePct}%) | Допустимо до 20%: ${s.remainingAllowed} пар | Ср. балл: ${s.avgGrade || '—'}`);
+  if (config.LOGGING.SENSITIVE_DIAGNOSTICS) {
+    console.log('\n================ АКАДЕМИЧЕСКИЙ СТАТУС IITU ================');
+    for (const s of attendanceList) {
+      console.log(`${s.statusLabel} | ${s.subjectName}`);
+      console.log(`  Пропусков: ${s.missedSessions}/${s.heldSessions} (${s.currentAbsencePct}%) | Допустимо до 20%: ${s.remainingAllowed} пар | Ср. балл: ${s.avgGrade || '—'}`);
+    }
+    console.log('===========================================================\n');
+  } else {
+    const dangerCount = attendanceList.filter(s => s.riskLevel === 'DANGER').length;
+    const warningCount = attendanceList.filter(s => s.riskLevel === 'WARNING').length;
+    console.log(`[Academic] Processed ${attendanceList.length} subjects (${dangerCount} danger, ${warningCount} warning).`);
   }
-  console.log('===========================================================\n');
 
   // Notion Synchronization (Dashboard + Real Assignments)
   if (notion) {

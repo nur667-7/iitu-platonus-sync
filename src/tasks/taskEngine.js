@@ -5,6 +5,7 @@
  */
 
 const config = require('../config');
+const { dateKeyInTimeZone } = require('../shared/clock');
 
 class TaskEngine {
   constructor(options = {}) {
@@ -31,8 +32,7 @@ class TaskEngine {
     });
 
     if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`Notion API error ${res.status}: ${errText}`);
+      throw new Error(`Notion API request failed with status ${res.status}`);
     }
 
     return await res.json();
@@ -288,7 +288,7 @@ class TaskEngine {
    * Tasks planned for Today or with Deadline Today
    */
   async getTodayTasks() {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = dateKeyInTimeZone();
     const all = await this.getActiveTasks();
 
     return all.filter(t => {
@@ -302,7 +302,7 @@ class TaskEngine {
    * Overdue tasks (Deadline in past, not completed)
    */
   async getOverdueTasks() {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = dateKeyInTimeZone();
     const all = await this.getActiveTasks();
 
     return all.filter(t => {

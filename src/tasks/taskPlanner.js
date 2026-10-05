@@ -4,6 +4,8 @@
  * and generates actionable daily focus recommendations.
  */
 
+const { dateKeyInTimeZone } = require('../shared/clock');
+
 class TaskPlanner {
   constructor(options = {}) {
     this.timezone = options.timezone || 'Asia/Almaty';
@@ -92,7 +94,7 @@ class TaskPlanner {
       if (t.priority === 'Критический') score += 60;
       if (t.priority === 'Высокий') score += 40;
 
-      const todayStr = now.toISOString().split('T')[0];
+      const todayStr = dateKeyInTimeZone(now);
       if (t.plannedDate && t.plannedDate.startsWith(todayStr)) score += 30;
 
       // Window fit bonus
