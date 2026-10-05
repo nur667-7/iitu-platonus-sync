@@ -8,6 +8,7 @@ const { TaskEngine } = require('../src/tasks/taskEngine');
 const { TaskClassifier } = require('../src/ai/taskClassifier');
 const { TaskPlanner } = require('../src/tasks/taskPlanner');
 const { StateManager } = require('../src/state');
+const { resolveWebhookSecret } = require('../src/shared/webhookSecret');
 
 module.exports = async function handler(req, res) {
   // 1. Health check & verification (GET)
@@ -26,7 +27,10 @@ module.exports = async function handler(req, res) {
   }
 
   // 3. Security: production webhook configuration is mandatory and fail-closed.
-  const configuredSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+  const configuredSecret = resolveWebhookSecret(
+    process.env.TELEGRAM_WEBHOOK_SECRET,
+    process.env.TELEGRAM_BOT_TOKEN
+  );
   const allowedChatId = String(process.env.TELEGRAM_CHAT_ID || '');
   if (!configuredSecret || !allowedChatId) {
     console.error('[Webhook] Required security configuration is missing');

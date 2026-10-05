@@ -60,13 +60,16 @@ test('Vercel Webhook: rejects wrong secret token with 401 when TELEGRAM_WEBHOOK_
 });
 
 test('Vercel Webhook: fails closed when security configuration is missing', async () => {
+  const previousBotToken = process.env.TELEGRAM_BOT_TOKEN;
   delete process.env.TELEGRAM_WEBHOOK_SECRET;
+  delete process.env.TELEGRAM_BOT_TOKEN;
   delete process.env.TELEGRAM_CHAT_ID;
   let responseStatus = null;
   const mockReq = { method: 'POST', headers: {}, body: { update_id: 1, message: { text: 'test', chat: { id: 123 } } } };
   const mockRes = { status: code => { responseStatus = code; return { json: data => data }; } };
   await webhookHandler(mockReq, mockRes);
   assert.strictEqual(responseStatus, 503);
+  if (previousBotToken) process.env.TELEGRAM_BOT_TOKEN = previousBotToken;
 });
 
 test('Vercel Webhook: rejects unauthorized chat before processing', async () => {

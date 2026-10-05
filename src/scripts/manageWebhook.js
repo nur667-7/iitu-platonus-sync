@@ -8,6 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { resolveWebhookSecret } = require('../shared/webhookSecret');
 
 function loadEnv() {
   const envPath = path.resolve(__dirname, '../../.env');
@@ -50,7 +51,10 @@ async function main() {
       console.error('Usage: node src/scripts/manageWebhook.js set <HTTPS_URL>');
       process.exit(1);
     }
-    const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
+    const secret = resolveWebhookSecret(
+      process.env.TELEGRAM_WEBHOOK_SECRET,
+      process.env.TELEGRAM_BOT_TOKEN
+    );
     let endpoint = `https://api.telegram.org/bot${token}/setWebhook?url=${encodeURIComponent(webhookUrl)}&drop_pending_updates=false`;
     if (secret) {
       endpoint += `&secret_token=${encodeURIComponent(secret)}`;
