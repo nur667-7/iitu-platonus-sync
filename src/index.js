@@ -124,8 +124,13 @@ async function syncTeams({ mode = 'sync', state, notifier, notion }) {
 
   let messages = [];
 
-  if (isTest) {
-    console.log('[Teams] Running test mode with synthetic dataset (5 messages)...');
+  const hasTeamsCredentials = Boolean(
+    config.TEAMS.ACCESS_TOKEN ||
+    (config.TEAMS.TENANT_ID && config.TEAMS.CLIENT_ID && config.TEAMS.CLIENT_SECRET)
+  );
+
+  if (isTest || (isDryRun && !hasTeamsCredentials)) {
+    console.log('[Teams] Running verification with synthetic dataset (5 messages)...');
     messages = getSyntheticTeamsMessages();
   } else {
     const teamsClient = new TeamsClient();
